@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Note App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nerko+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Baskervville SC', serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #121212; /* Dark background for default theme */
+            color: #e0e0e0; /* Light text color for default theme */
+            transition: background-color 0.3s, color 0.3s; /* Smooth transition for theme change */
+        }
+        .title {
+            font-family: 'Nerko One', cursive;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .note {
+            font-family: 'Baskervville SC', serif;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #canvas-container {
+            position: relative;
+            width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #1e1e1e; /* Slightly lighter dark background */
+            transition: background-color 0.3s, border-color 0.3s; /* Smooth transition for theme change */
+        }
+        #image-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        #image-row img {
+            max-width: 49%;
+            height: auto;
+        }
+        .neon-btn {
+            border: 2px solid #00ff00; /* Neon border color */
+            border-radius: 5px;
+            padding: 10px 20px;
+            background-color: #000; /* Background color of the button */
+            color: #00ff00; /* Neon text color */
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8); /* Neon glow effect */
+            transition: box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
+        }
+        .neon-btn:hover {
+            background-color: #00ff00; /* Neon background color on hover */
+            color: #000; /* Text color on hover */
+            box-shadow: 0 0 20px rgba(0, 255, 0, 1); /* Enhanced glow on hover */
+        }
+        .neon-btn:active {
+            background-color: #00cc00; /* Darker neon background color on click */
+        }
+        .neon-select {
+            border: 2px solid #00ff00; /* Neon border color */
+            border-radius: 5px;
+            padding: 5px;
+            background-color: #000; /* Background color of the select element */
+            color: #00ff00; /* Neon text color */
+            font-size: 16px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8); /* Neon glow effect */
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .neon-select:focus {
+            box-shadow: 0 0 20px rgba(0, 255, 0, 1); /* Enhanced glow on focus */
+        }
+        .neon-select option {
+            background-color: #000; /* Option background color */
+            color: #00ff00; /* Option text color */
+        }
+        .neon-input {
+            border: 2px solid #00ff00; /* Neon border color */
+            border-radius: 5px;
+            background-color: #000; /* Background color of the input element */
+            color: #00ff00; /* Neon text color */
+            font-size: 16px;
+            padding: 5px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.8); /* Neon glow effect */
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .neon-input:focus {
+            box-shadow: 0 0 20px rgba(0, 255, 0, 1); /* Enhanced glow on focus */
+        }
+        .neon-effect-1 {
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+        }
+        .neon-effect-2 {
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff;
+        }
+        .neon-effect-3 {
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+        }
+        .neon-effect-4 {
+            text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00, 0 0 30px #ffff00;
+        }
+        .neon-effect-5 {
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000;
+        }
+        .light-mode {
+            background-color: #ffffff; /* Light background for light mode */
+            color: #000000; /* Dark text color for light mode */
+        }
+        .light-mode #canvas-container {
+            background-color: #f0f0f0; /* Light background for the canvas container in light mode */
+            border-color: #ccc; /* Light border color for the canvas container in light mode */
+        }
+        .light-mode .neon-btn {
+            border-color: #ff00ff; /* Neon border color for light mode */
+            color: #ff00ff; /* Neon text color for light mode */
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.8); /* Neon glow effect for light mode */
+        }
+        .light-mode .neon-btn:hover {
+            background-color: #ff00ff; /* Neon background color on hover for light mode */
+            color: #fff; /* Text color on hover for light mode */
+            box-shadow: 0 0 20px rgba(255, 0, 255, 1); /* Enhanced glow on hover for light mode */
+        }
+        .light-mode .neon-select {
+            border-color: #ff00ff; /* Neon border color for light mode */
+            color: #ff00ff; /* Neon text color for light mode */
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.8); /* Neon glow effect for light mode */
+        }
+        .light-mode .neon-select:focus {
+            box-shadow: 0 0 20px rgba(255, 0, 255, 1); /* Enhanced glow on focus for light mode */
+        }
+        .light-mode .neon-input {
+            border-color: #ff00ff; /* Neon border color for light mode */
+            color: #ff00ff; /* Neon text color for light mode */
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.8); /* Neon glow effect for light mode */
+        }
+        .light-mode .neon-input:focus {
+            box-shadow: 0 0 20px rgba(255, 0, 255, 1); /* Enhanced glow on focus for light mode */
+        }
+    </style>
+</head>
+<body>
+    <div class="control-panel">
+        <div>
+            <label for="mode-selector">Mode:</label>
+            <select id="mode-selector" class="neon-select">
+                <option value="dark">Dark Mode</option>
+                <option value="light">Light Mode</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="font-title">Title Font:</label>
+            <select id="font-title" class="neon-select">
+                <!-- Font options go here -->
+            </select>
+
+            <label for="size-title">Font Size:</label>
+            <input type="number" id="size-title" value="24" min="10" max="72" class="neon-input">
+
+            <label for="color-title">Font Color:</label>
+            <input type="color" id="color-title" value="#ffffff" class="neon-input">
+        </div>
+
+        <div>
+            <label for="font-note">Note Font:</label>
+            <select id="font-note" class="neon-select">
+                <!-- Font options go here -->
+            </select>
+
+            <label for="size-note">Font Size:</label>
+            <input type="number" id="size-note" value="18" min="10" max="72" class="neon-input">
+
+            <label for="color-note">Font Color:</label>
+            <input type="color" id="color-note" value="#ffffff" class="neon-input">
+        </div>
+
+        <div>
+            <label for="neon-effect">Neon Effect:</label>
+            <select id="neon-effect" class="neon-select">
+                <option value="">None</option>
+                <option value="neon-effect-1">Green Neon</option>
+                <option value="neon-effect-2">Pink Neon</option>
+                <option value="neon-effect-3">Cyan Neon</option>
+                <option value="neon-effect-4">Yellow Neon</option>
+                <option value="neon-effect-5">Red Neon</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="date-selector">Date:</label>
+            <input type="date" id="date-selector" class="neon-input">
+        </div>
+
+        <input type="file" id="image1" accept="image/*">
+        <input type="file" id="image2" accept="image/*">
+        <br><br>
+        <input type="text" id="title" placeholder="Enter title" class="neon-input">
+        <br><br>
+        <textarea id="note" placeholder="Enter your note" rows="5" cols="50" class="neon-input"></textarea>
+    </div>
+
+    <div id="canvas-container">
+        <h1 id="display-title" class="title"></h1>
+        <div id="image-row">
+            <img id="display-image1" src="" alt="">
+            <img id="display-image2" src="" alt="">
+        </div>
+        <p id="display-note" class="note"></p>
+        <p id="display-date"></p> <!-- Date display -->
+    </div>
+    <button class="neon-btn" onclick="downloadImage()">Download as Image</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.3.2/dist/html2canvas.min.js"></script>
+    <script>
+        const image1Input = document.getElementById('image1');
+        const image2Input = document.getElementById('image2');
+        const titleInput = document.getElementById('title');
+        const noteInput = document.getElementById('note');
+        const dateSelector = document.getElementById('date-selector');
+        const displayTitle = document.getElementById('display-title');
+        const displayImage1 = document.getElementById('display-image1');
+        const displayImage2 = document.getElementById('display-image2');
+        const displayNote = document.getElementById('display-note');
+        const displayDate = document.getElementById('display-date');
+        const fontTitleSelect = document.getElementById('font-title');
+        const sizeTitleInput = document.getElementById('size-title');
+        const colorTitleInput = document.getElementById('color-title');
+        const fontNoteSelect = document.getElementById('font-note');
+        const sizeNoteInput = document.getElementById('size-note');
+        const colorNoteInput = document.getElementById('color-note');
+        const modeSelector = document.getElementById('mode-selector');
+        const neonEffectSelect = document.getElementById('neon-effect');
+
+        const fonts = [
+            'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Oswald', 'Source Sans Pro', 'Raleway', 'PT Sans',
+            'Noto Sans', 'Ubuntu', 'Merriweather', 'Playfair Display', 'Work Sans', 'Poppins', 'Nunito',
+            'Cabin', 'Dosis', 'Quicksand', 'Fira Sans', 'Barlow', 'Rubik', 'Lora', 'Inconsolata',
+            'Mukta', 'Varela Round', 'Josefin Sans', 'Indie Flower', 'Anton', 'Amatic SC', 'Fjalla One',
+            'Exo 2', 'Karla', 'Teko', 'Catamaran', 'Titillium Web', 'Manrope', 'Zilla Slab', 'Asap',
+            'Oxygen', 'Crimson Text', 'Arimo', 'Righteous', 'Muli', 'Yanone Kaffeesatz', 'Signika',
+            'Acme', 'Bitter', 'Kanit', 'Inter', 'Balsamiq Sans', 'DM Sans', 'Libre Baskerville',
+            'Kalam', 'Comfortaa', 'Architects Daughter', 'Patrick Hand', 'Questrial', 'Rokkitt',
+            'Concert One', 'Archivo', 'IBM Plex Sans', 'Cairo', 'Sarabun', 'Hind', 'Baloo 2',
+            'Vollkorn', 'Space Mono', 'Mulish', 'Fira Sans Condensed', 'Barlow Condensed', 'Asap Condensed',
+            'Maven Pro', 'Rajdhani', 'Satisfy', 'Martel', 'Noto Serif', 'Nanum Gothic', 'Alata',
+            'Changa', 'Didact Gothic', 'Red Hat Display', 'DM Serif Display', 'Cormorant Garamond',
+            'Sora', 'Unna', 'Eczar', 'Overpass', 'El Messiri', 'Arvo', 'Julius Sans One', 'Arima Madurai',
+            'Khand', 'Faustina', 'Frank Ruhl Libre', 'Monda', 'Rufina'
+        ];
+
+        // Load Google Fonts dynamically
+        const linkElement = document.createElement('link');
+        linkElement.rel = 'stylesheet';
+        linkElement.href = `https://fonts.googleapis.com/css2?family=${fonts.map(font => font.replace(/\s+/g, '+')).join('&family=')}&display=swap`;
+        document.head.appendChild(linkElement);
+
+        // Populate the font dropdowns
+        fonts.forEach(font => {
+            const optionTitle = document.createElement('option');
+            optionTitle.value = `'${font}', sans-serif`;
+            optionTitle.textContent = font;
+            fontTitleSelect.appendChild(optionTitle);
+
+            const optionNote = document.createElement('option');
+            optionNote.value = `'${font}', sans-serif`;
+            optionNote.textContent = font;
+            fontNoteSelect.appendChild(optionNote);
+        });
+
+        image1Input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                displayImage1.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        image2Input.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                displayImage2.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
+        });
+
+        titleInput.addEventListener('input', () => {
+            displayTitle.textContent = titleInput.value;
+        });
+
+        noteInput.addEventListener('input', () => {
+            displayNote.textContent = noteInput.value;
+        });
+
+        dateSelector.addEventListener('input', () => {
+            displayDate.textContent = `Date: ${dateSelector.value}`;
+        });
+
+        fontTitleSelect.addEventListener('change', () => {
+            displayTitle.style.fontFamily = fontTitleSelect.value;
+        });
+
+        sizeTitleInput.addEventListener('input', () => {
+            displayTitle.style.fontSize = `${sizeTitleInput.value}px`;
+        });
+
+        colorTitleInput.addEventListener('input', () => {
+            displayTitle.style.color = colorTitleInput.value;
+        });
+
+        fontNoteSelect.addEventListener('change', () => {
+            displayNote.style.fontFamily = fontNoteSelect.value;
+        });
+
+        sizeNoteInput.addEventListener('input', () => {
+            displayNote.style.fontSize = `${sizeNoteInput.value}px`;
+        });
+
+        colorNoteInput.addEventListener('input', () => {
+            displayNote.style.color = colorNoteInput.value;
+        });
+
+        neonEffectSelect.addEventListener('change', () => {
+            const selectedEffect = neonEffectSelect.value;
+            displayTitle.className = `title ${selectedEffect}`;
+            displayNote.className = `note ${selectedEffect}`;
+        });
+
+        modeSelector.addEventListener('change', () => {
+            if (modeSelector.value === 'light') {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
+        });
+
+        function downloadImage() {
+            html2canvas(document.getElementById('canvas-container')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'image-note.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
